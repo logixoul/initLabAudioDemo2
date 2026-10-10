@@ -1,0 +1,1 @@
+clang++ -O2 -std=c++20 -Llib -lminiaudio main.cpp -o synth.exe
