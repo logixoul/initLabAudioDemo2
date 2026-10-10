@@ -1,0 +1,31 @@
+#include <miniaudio.h>
+#include <stdexcept>
+#include <iostream>
+
+static ma_device device;
+
+void initMiniaudio(ma_device_data_proc audioDataCallback) {
+    ma_device_config deviceConfig;
+
+    deviceConfig = ma_device_config_init(ma_device_type_playback);
+    deviceConfig.playback.format   = ma_format_f32;
+    deviceConfig.playback.channels = 1;
+    deviceConfig.sampleRate        = 48000;
+    deviceConfig.dataCallback      = audioDataCallback;
+    deviceConfig.pUserData         = NULL;
+
+    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
+        throw std::runtime_error("Failed to open playback device.");
+    }
+
+    std::cout << "Device Name: " << device.playback.name << std::endl;
+
+    if (ma_device_start(&device) != MA_SUCCESS) {
+        ma_device_uninit(&device);
+        throw std::runtime_error("Failed to start playback device.");
+    }
+}
+
+void uninitMiniaudio() {
+    ma_device_uninit(&device);
+}

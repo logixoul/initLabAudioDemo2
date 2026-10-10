@@ -1,1 +1,1 @@
-clang++ -O2 -std=c++20 -Llib -lminiaudio main.cpp -o synth.exe
+clang++ -O2 -std=c++20 -Ilib -lopengl32 -lgdi32 -luser32 main.cpp lib/lib_impl.cpp -o synth.exe

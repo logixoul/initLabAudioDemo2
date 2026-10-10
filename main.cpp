@@ -1,49 +1,39 @@
-#define MA_NO_DECODING
-#define MA_NO_ENCODING
-#define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
+#include <sokol_app.h>
 #include <stdio.h>
+#include <cmath>
+#include "miniaudio_init.h"
 
-static int time = 0;
+static int currentSampleIndex = 0;
 
-void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
+void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
-    time++;
     float* fOutput = (float*)pOutput;
     for(int i = 0; i < frameCount; i++) {
-        fOutput[i] = 0.2f * sinf(2 * 3.14159265f * 220 * (float)time / 48000);
-        time++;
+        fOutput[i] = 0.2f * std::sin(2 * 3.14159265f * 220 * (float)currentSampleIndex / 48000);
+        currentSampleIndex++;
     }
-    (void)pInput;   /* Unused. */
+    (void)pInput;   // Unused
 }
 
-int main()
-{
-    ma_device_config deviceConfig;
-    ma_device device;
 
-    deviceConfig = ma_device_config_init(ma_device_type_playback);
-    deviceConfig.playback.format   = ma_format_f32;
-    deviceConfig.playback.channels = 1;
-    deviceConfig.sampleRate        = 48000;
-    deviceConfig.dataCallback      = data_callback;
-    deviceConfig.pUserData         = &sineWave;
+void init(void) {
+    initMiniaudio(&audioDataCallback);
+}
+void frame(void) {
 
-    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
-        printf("Failed to open playback device.\n");
-        return -4;
-    }
+}
+void cleanup(void) {
+    uninitMiniaudio();
+}
 
-    printf("Device Name: %s\n", device.playback.name);
-
-    if (ma_device_start(&device) != MA_SUCCESS) {
-        printf("Failed to start playback device.\n");
-        ma_device_uninit(&device);
-        return -5;
-    }
-    
-    printf("Press Enter to quit...\n");
-    getchar();
-    
-    ma_device_uninit(&device);
+sapp_desc sokol_main(int argc, char* argv[]) {
+    return sapp_desc{
+        .init_cb = init,
+        .frame_cb = frame,
+        .cleanup_cb = cleanup,
+        .width = 800,
+        .height = 600,
+        .window_title = "My Sokol App",
+    };
 }
