@@ -1,10 +1,11 @@
 CXX      = clang++
-CXXFLAGS = -O2 -std=c++20 -Ilib -Ilib/imgui -MMD -MP
+CXXFLAGS = -O2 -std=c++20 -Ilib -Ilib/imgui -Ilib/sokol -MMD -MP
 LDLIBS   = -lopengl32 -lgdi32 -luser32
-OBJS     = build/main.o build/lib_impl.o
+OBJS     = build/sokol_main.o build/lib_impl.o \
+           build/imgui.o build/imgui_draw.o build/imgui_tables.o build/imgui_widgets.o
 
-# Look for sources in the root and in lib/.
-vpath %.cpp . lib
+# Look for sources in src/, lib/ and lib/imgui/.
+vpath %.cpp src lib lib/imgui
 
 build/synth.exe: $(OBJS)
 	$(CXX) $^ $(LDLIBS) -o $@
