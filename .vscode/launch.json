@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run synth",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/synth.exe",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build"
+        }
+    ]
+}
