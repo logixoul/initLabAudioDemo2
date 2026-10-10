@@ -16,15 +16,13 @@ void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma
     (void)pInput;   // Unused
 }
 
+MiniAudioWrapper miniAudioWrapper(audioDataCallback);
 
 void init(void) {
-    initMiniaudio(&audioDataCallback);
 }
 void frame(void) {
-
 }
 void cleanup(void) {
-    uninitMiniaudio();
 }
 
 sapp_desc sokol_main(int argc, char* argv[]) {
@@ -32,8 +30,5 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .init_cb = init,
         .frame_cb = frame,
         .cleanup_cb = cleanup,
-        .width = 800,
-        .height = 600,
-        .window_title = "My Sokol App",
     };
 }
