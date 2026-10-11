@@ -8,7 +8,7 @@ namespace workshop {
 
 class IAudioStreamProvider {
 public:
-    virtual void getAudioData(float* pOutput, ma_uint32 frameCount, ma_uint32 sampleRate) = 0;
+    virtual void getAudioData(float* pOutput, ma_uint32 frameCount) = 0;
 };
 
 class AudioSystem {
@@ -46,7 +46,7 @@ public:
 	static void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
 		IAudioStreamProvider* pStreamProvider = (IAudioStreamProvider*)pDevice->pUserData;
 		float* fOutput = (float*)pOutput;
-		pStreamProvider->getAudioData(fOutput, frameCount, pDevice->sampleRate);
+		pStreamProvider->getAudioData(fOutput, frameCount);
 		(void)pInput;   // Unused
 	}
 };

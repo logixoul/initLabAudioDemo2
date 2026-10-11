@@ -9,6 +9,7 @@
 
 namespace workshop {
 	std::atomic<float> frequency = 440.0f; // Default frequency
+	static const float SAMPLE_RATE = 48000;
 
 	class WorkshopApp : public IAudioStreamProvider {
 	public:
@@ -16,7 +17,7 @@ namespace workshop {
 		workshop::GuiSystem guiSystem;
 
 		WorkshopApp() {
-			audioSystem.init(48000, this);
+			audioSystem.init(SAMPLE_RATE, this);
 			guiSystem.init();
 		}
 
@@ -29,9 +30,9 @@ namespace workshop {
 
 		float phase = 0.0f;
 
-		void getAudioData(float* pOutput, ma_uint32 frameCount, ma_uint32 sampleRate) override {
-			const float phaseStep = frequency / sampleRate;
-			const float oneTurn = 2 * 3.14159265f;
+		void getAudioData(float* pOutput, ma_uint32 frameCount) override {
+			const float phaseStep = frequency / SAMPLE_RATE;
+			static const float oneTurn = 2.0f * 3.14159265f;
 			for(ma_uint32 i = 0; i < frameCount; i++) {
 				pOutput[i] = 0.2f * std::sin(phase * oneTurn);
 				phase = std::fmod(phase + phaseStep, 1.0f);
