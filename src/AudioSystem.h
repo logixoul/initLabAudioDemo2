@@ -9,6 +9,8 @@ namespace workshop {
 class IAudioStreamProvider {
 public:
     virtual void getAudioData(float* pOutput, ma_uint32 frameCount) = 0;
+
+	virtual ~IAudioStreamProvider() = default;
 };
 
 class AudioSystem {

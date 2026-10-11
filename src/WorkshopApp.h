@@ -11,14 +11,14 @@ namespace workshop {
 	std::atomic<float> frequency = 440.0f; // Default frequency
 	static const int SAMPLE_RATE = 48000;
 
-	class WorkshopApp : public IAudioStreamProvider {
+	class WorkshopApp : public IAudioStreamProvider, public IGuiListener {
 	public:
 		workshop::AudioSystem _audioSystem;
 		workshop::GuiSystem _guiSystem;
 
 		WorkshopApp() {
 			_audioSystem.init(SAMPLE_RATE, this);
-			_guiSystem.init();
+			_guiSystem.init(this);
 		}
 
 		void readControls() {
@@ -37,6 +37,10 @@ namespace workshop {
 				pOutput[i] = 0.2f * std::sin(_phase * oneTurn);
 				_phase = std::fmod(_phase + phaseStep, 1.0f);
 			}
+		}
+
+		virtual void onEvent(const sapp_event* ev) override {
+
 		}
 	};
 }

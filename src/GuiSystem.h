@@ -7,14 +7,23 @@
 #include <imgui.h>
 #include <sokol_imgui.h>
 
+
 namespace workshop {
+	class IGuiListener {
+	public:
+		virtual void onEvent(sapp_event const* ev) = 0;
+
+		virtual ~IGuiListener() = default;
+	};
+
 	class GuiSystem {
 	public:
-		GuiSystem() {
-		}
-		void init() {
+		IGuiListener* _listener;
+
+		void init(IGuiListener* listener) {
 			sg_setup(sg_desc{ .environment = sglue_environment() });
         	simgui_setup(simgui_desc_t{});
+			_listener = listener;
 		}
 
 		~GuiSystem() {
@@ -23,7 +32,10 @@ namespace workshop {
 		}
 
 		void handleEvent(const sapp_event* ev) {
-			simgui_handle_event(ev);
+			bool imguiHandledIt = simgui_handle_event(ev);
+			if(!imguiHandledIt) {
+				_listener->onEvent(ev);
+			}
 		}
 		void onBeginFrame() {
 			simgui_new_frame({ sapp_width(), sapp_height(), sapp_frame_duration(), sapp_dpi_scale() });
