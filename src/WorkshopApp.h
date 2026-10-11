@@ -10,7 +10,7 @@
 namespace workshop {
 	std::atomic<float> frequency = 440.0f; // Default frequency
 	static const float oneTurn = 2 * 3.14159265f;
-	static const SAMPLE_RATE = 48000;
+	static const int SAMPLE_RATE = 48000;
 
 	class OscBase {
 	public:
