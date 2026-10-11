@@ -30,10 +30,11 @@ namespace workshop {
 		float phase = 0.0f;
 
 		void getAudioData(float* pOutput, ma_uint32 frameCount, ma_uint32 sampleRate) override {
-			float phaseStep = 2 * 3.14159265f * frequency / sampleRate;
+			const float phaseStep = frequency / sampleRate;
+			const float oneTurn = 2 * 3.14159265f;
 			for(ma_uint32 i = 0; i < frameCount; i++) {
-				pOutput[i] = 0.2f * std::sin(phase);
-				phase = std::fmod(phase + phaseStep, 2 * 3.14159265f);
+				pOutput[i] = 0.2f * std::sin(phase * oneTurn);
+				phase = std::fmod(phase + phaseStep, 1.0f);
 			}
 		}
 	};
