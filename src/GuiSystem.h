@@ -12,6 +12,8 @@ namespace workshop {
 	class IGuiListener {
 	public:
 		virtual void onEvent(sapp_event const* ev) = 0;
+
+		virtual ~IGuiListener() = default;
 	};
 
 	class GuiSystem {

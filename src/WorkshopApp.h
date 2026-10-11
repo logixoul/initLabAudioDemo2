@@ -7,9 +7,23 @@
 #include <cmath>
 #include <atomic>
 #include <memory>
+#include <map>
 
 namespace workshop {
 	std::atomic<float> frequency = 440.0f; // Default frequency
+	std::map<char, int> keyMap = { 
+		{ 'Q', 0 },
+		{ '2', 1 },
+		{ 'W', 2 },
+		{ '3', 3 },
+		{ 'W', 4 },
+		{ 'W', 5 },
+		{ 'W', 6 },
+		{ 'W', 2 },
+		{ 'W', 2 },
+		{ 'W', 2 },
+		{ 'W', 2 },
+	};
 	static const float oneTurn = 2 * 3.14159265f;
 	static const int SAMPLE_RATE = 48000;
 
@@ -18,6 +32,8 @@ namespace workshop {
 		float _phase = 0.0f;
 
 		virtual float getNextValue() = 0;
+
+		virtual ~OscBase() = default;
 	};
 
 	class Sine : public OscBase {
@@ -85,7 +101,7 @@ namespace workshop {
 			}
 		}
 
-		void getAudioData(float* pOutput, ma_uint32 frameCount) override {
+		virtual void getAudioData(float* pOutput, ma_uint32 frameCount) override {
 			for(ma_uint32 i = 0; i < frameCount; i++) {
 				pOutput[i] = _osc->getNextValue();
 			}
