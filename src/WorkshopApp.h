@@ -13,12 +13,12 @@ namespace workshop {
 
 	class WorkshopApp : public IAudioStreamProvider {
 	public:
-		workshop::AudioSystem audioSystem;
-		workshop::GuiSystem guiSystem;
+		workshop::AudioSystem _audioSystem;
+		workshop::GuiSystem _guiSystem;
 
 		WorkshopApp() {
-			audioSystem.init(SAMPLE_RATE, this);
-			guiSystem.init();
+			_audioSystem.init(SAMPLE_RATE, this);
+			_guiSystem.init();
 		}
 
 		void readControls() {
@@ -28,14 +28,14 @@ namespace workshop {
 			}
 		}
 
-		float phase = 0.0f;
+		float _phase = 0.0f;
 
 		void getAudioData(float* pOutput, ma_uint32 frameCount) override {
 			const float phaseStep = frequency / SAMPLE_RATE;
 			static const float oneTurn = 2.0f * 3.14159265f;
 			for(ma_uint32 i = 0; i < frameCount; i++) {
-				pOutput[i] = 0.2f * std::sin(phase * oneTurn);
-				phase = std::fmod(phase + phaseStep, 1.0f);
+				pOutput[i] = 0.2f * std::sin(_phase * oneTurn);
+				_phase = std::fmod(_phase + phaseStep, 1.0f);
 			}
 		}
 	};

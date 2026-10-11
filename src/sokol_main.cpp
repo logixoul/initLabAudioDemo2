@@ -11,12 +11,12 @@ namespace workshop {
 		delete app;
 	}
 	void updateApp() {
-		app->guiSystem.onBeginFrame();
+		app->_guiSystem.onBeginFrame();
 		app->readControls();
-		app->guiSystem.onEndFrame();
+		app->_guiSystem.onEndFrame();
 	}
 	void appHandleEvent(const sapp_event* ev) {
-		app->guiSystem.handleEvent(ev);
+		app->_guiSystem.handleEvent(ev);
 	}
 }
 

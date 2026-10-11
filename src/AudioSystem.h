@@ -13,7 +13,7 @@ public:
 
 class AudioSystem {
 private:
-    ma_device device;
+    ma_device _device;
 
 public:
     void init(int sampleRate, IAudioStreamProvider* userData = nullptr) {
@@ -26,20 +26,20 @@ public:
         deviceConfig.dataCallback      = &AudioSystem::audioDataCallback;
         deviceConfig.pUserData         = userData;
 
-        if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
+        if (ma_device_init(NULL, &deviceConfig, &_device) != MA_SUCCESS) {
             throw std::runtime_error("Failed to open playback device.");
         }
 
-        std::cout << "Device Name: " << device.playback.name << std::endl;
+        std::cout << "Device Name: " << _device.playback.name << std::endl;
 
-        if (ma_device_start(&device) != MA_SUCCESS) {
-            ma_device_uninit(&device);
+        if (ma_device_start(&_device) != MA_SUCCESS) {
+            ma_device_uninit(&_device);
             throw std::runtime_error("Failed to start playback device.");
         }
     }
 
     ~AudioSystem() {
-        ma_device_uninit(&device);
+        ma_device_uninit(&_device);
     }
 
 	private:
