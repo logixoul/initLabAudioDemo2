@@ -67,7 +67,7 @@ namespace workshop {
 		}
 	};
 	
-	class WorkshopApp : public IAudioStreamProvider {
+	class WorkshopApp : public workshop::IAudioStreamProvider, public workshop::IGuiListener {
 	public:
 		workshop::AudioSystem _audioSystem;
 		workshop::GuiSystem _guiSystem;
@@ -75,7 +75,7 @@ namespace workshop {
 
 		WorkshopApp() {
 			_audioSystem.init(SAMPLE_RATE, this);
-			_guiSystem.init();
+			_guiSystem.init(this);
 		}
 
 		void readControls() {
@@ -88,6 +88,14 @@ namespace workshop {
 		void getAudioData(float* pOutput, ma_uint32 frameCount) override {
 			for(ma_uint32 i = 0; i < frameCount; i++) {
 				pOutput[i] = _osc->getNextValue();
+			}
+		}
+
+		virtual void onEvent(sapp_event const* ev) override {
+			if(ev->type == SAPP_EVENTTYPE_KEY_DOWN) {
+				if(ev->key_code == 'A') {
+					_osc = new NoteInstance(15);
+				}
 			}
 		}
 	};
