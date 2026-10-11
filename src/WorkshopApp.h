@@ -9,7 +9,7 @@
 
 namespace workshop {
 	std::atomic<float> frequency = 440.0f; // Default frequency
-	static const float SAMPLE_RATE = 48000;
+	static const int SAMPLE_RATE = 48000;
 
 	class WorkshopApp : public IAudioStreamProvider {
 	public:
