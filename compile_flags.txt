@@ -1,3 +1,5 @@
+-xc++
+-std=c++20
 -Ilib
 -Ilib/imgui
--std=c++20
+-Ilib/sokol

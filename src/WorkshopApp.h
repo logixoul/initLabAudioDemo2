@@ -5,7 +5,8 @@
 #include "./AudioSystem.h"
 #include "./GuiSystem.h"
 #include <cmath>
-#include <atomic>+
+#include <atomic>
+#include <memory>
 
 namespace workshop {
 	std::atomic<float> frequency = 440.0f; // Default frequency
@@ -14,59 +15,67 @@ namespace workshop {
 
 	class OscBase {
 	public:
-		float phase = 0.0f;
+		float _phase = 0.0f;
 
-		virtual void getNextValue() {
-			phase++;
-		}
+		virtual float getNextValue() = 0;
 	};
 
 	class Sine : public OscBase {
 	public:
-		virtual void getNextValue() override {
-			OscBase::getNextValue();
-			const float phaseStep = frequency / sampleRate;
-			phase = std::fmod(phase + phaseStep, 1.0f);
-			return 0.2f * std::sin(phase * oneTurn);
+		virtual float getNextValue() override {
+			_phase++;
+			const float phaseStep = frequency / SAMPLE_RATE;
+			_phase = std::fmod(_phase + phaseStep, 1.0f);
+			return 0.2f * std::sin(_phase * oneTurn);
 		}
 	};
 
 	class Env {
 	public:
-		float phase = 0.0f;
+		float _phase = 0.0f;
 
-		float getNextValue(int sampleRate, bool* finished) {
-			phase++;
-			const float tailLength = 0.15f * sampleRate;
-			if(phase > tailLength) {
-				finished = true;
+		float getNextValue(bool* finished) {
+			_phase++;
+			const float tailLength = 10.15f * SAMPLE_RATE;
+			if(_phase > tailLength) {
+				*finished = true;
 				return 0.0f;
 			}
-			finished = false;
-			return pow((tailLength - phase) / tailLength, 2.0f);
+			*finished = false;
+			return pow((tailLength - _phase) / tailLength, 2.0f);
 		}
 	};
 
 	class NoteInstance {
 	public:
-		int pitchIndex;
-		OscBase* osc = new Sine();
-		Env env;
+		int _pitchIndex;
+		std::shared_ptr<OscBase> _osc;
+		Env _env;
+		bool _finished;
+
+		NoteInstance(int pitchIndex) {
+			_osc = std::make_shared<Sine>();
+			this->_pitchIndex = pitchIndex;
+		}
 
 		float getNextValue() {
-			return env.getNextValue() * osc->getNextValue();
+			bool finished;
+			return _env.getNextValue(&finished) * _osc->getNextValue();
+			if(finished) {
+				this->_finished = true;
+			}
 		}
 	};
 	
 	class WorkshopApp : public IAudioStreamProvider {
 	public:
-		workshop::AudioSystem audioSystem;
-		workshop::GuiSystem guiSystem;
-		OscBase* osc = new Sine(440);
+		workshop::AudioSystem _audioSystem;
+		workshop::GuiSystem _guiSystem;
+		NoteInstance* _osc = new NoteInstance(440);
 
 		WorkshopApp() {
-			audioSystem.init(SAMPLE_RATE, this);
-			guiSystem.init();
+			_audioSystem.init(SAMPLE_RATE, this);
+			_guiSystem.init();
 		}
 
 		void readControls() {
@@ -76,10 +85,9 @@ namespace workshop {
 			}
 		}
 
-		void getAudioData(float* pOutput, ma_uint32 frameCount, ma_uint32 sampleRate) override {
+		void getAudioData(float* pOutput, ma_uint32 frameCount) override {
 			for(ma_uint32 i = 0; i < frameCount; i++) {
-				pOutput[i] = 0.2f * std::sin(phase * oneTurn);
-				phase = std::fmod(phase + phaseStep, 1.0f);
+				pOutput[i] = _osc->getNextValue();
 			}
 		}
 	};

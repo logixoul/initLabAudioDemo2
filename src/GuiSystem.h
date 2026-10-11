@@ -1,6 +1,7 @@
 #ifndef GUISYSTEM_H
 #define GUISYSTEM_H
 
+#include <sokol_app.h>
 #include <sokol_gfx.h>
 #include <sokol_glue.h>
 #include <imgui.h>
@@ -23,6 +24,7 @@ namespace workshop {
 
 		void handleEvent(const sapp_event* ev) {
 			simgui_handle_event(ev);
+			
 		}
 		void onBeginFrame() {
 			simgui_new_frame({ sapp_width(), sapp_height(), sapp_frame_duration(), sapp_dpi_scale() });
