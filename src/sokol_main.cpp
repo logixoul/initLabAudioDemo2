@@ -12,7 +12,7 @@ namespace workshop {
 	}
 	void updateApp() {
 		app->_guiSystem.onBeginFrame();
-		app->readControls();
+		app->update();
 		app->_guiSystem.onEndFrame();
 	}
 	void appHandleEvent(const sapp_event* ev) {

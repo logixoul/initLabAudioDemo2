@@ -21,7 +21,7 @@ namespace workshop {
 			_guiSystem.init(this);
 		}
 
-		void readControls() {
+		void update() {
 			float f = frequency;
 			if (ImGui::SliderFloat("Frequency", &f, 50.0f, 1000.0f, "%.0f Hz")) {
 				frequency = f;
