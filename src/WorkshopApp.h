@@ -148,6 +148,14 @@ namespace workshop {
 				if(keyMap.contains(ev->key_code)) {
 					_notes.push_back(new NoteInstance(keyMap.at(ev->key_code)));
 				}
+			} else if(ev->type == SAPP_EVENTTYPE_KEY_UP) {
+				if(keyMap.contains(ev->key_code)) {
+					for(auto& note : _notes) {
+						if(note->_pitchIndex == keyMap.at(ev->key_code)) {
+							note->_finished = true;
+						}
+					}
+				}
 			}
 		}
 	};
