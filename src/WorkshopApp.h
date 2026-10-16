@@ -79,17 +79,39 @@ namespace workshop {
 		int _writeIndex = 0;
 		// length is in sec
 	public:
-		void init(float length) {
-			_buffer.resize(SAMPLE_RATE * length, 0.0);
+		void init(float duration) {
+			_buffer.resize(SAMPLE_RATE * duration, 0.0);
 		}
 		float process(float in) {
 			float before = _buffer[_writeIndex];
 			float& out = _buffer[_writeIndex];
-			out *= .75;
+			out *= .9;
 			out += in;
 			_writeIndex++;
 			_writeIndex %= _buffer.size();
-			return before + in;
+			return before;
+		}
+	};
+	
+	class Reverb {
+		std::vector<DelayLine> _delays;
+	public:
+		void init(float decay) {
+			const int num = 11;
+			for(int i = 0; i < num; i++) {
+				float iNorm = i / float(num);
+				float delayDuration = decay + 0.04 * iNorm;
+				DelayLine delay; delay.init(delayDuration);
+				_delays.push_back(delay);
+			}
+		}
+
+		float process(float in) {
+			float out = 0.0;
+			for(auto& delay : _delays) {
+				out += delay.process(in);
+			}
+			return 0.9f*in+0.5f*out / _delays.size();
 		}
 	};
 
@@ -98,7 +120,7 @@ namespace workshop {
 		int _pitchIndex;
 		std::shared_ptr<OscBase> _osc;
 		Env _env;
-		bool _finished;
+		bool _finished = false;
 
 		NoteInstance(int pitchIndex) {
 			static const float twelvethRootOf2 = std::powf(2.0f, 1.0f /12.0f);
@@ -121,10 +143,10 @@ namespace workshop {
 		workshop::GuiSystem _guiSystem;
 		NoteInstance* _osc = new NoteInstance(440);
 		std::vector<NoteInstance*> _notes;
-		DelayLine _delay;
+		Reverb _reverb;
 
 		WorkshopApp() {
-			_delay.init(0.15f);
+			_reverb.init(0.15f);
 			_audioSystem.init(SAMPLE_RATE, this);
 			_guiSystem.init(this);
 		}
@@ -155,7 +177,8 @@ namespace workshop {
 				for(auto note : _notes) {
 					pOutput[i] += note->getNextValue();
 				}
-				pOutput[i] = _delay.process(pOutput[i]);
+				pOutput[i] = _reverb.process(pOutput[i]);
+				pOutput[i] *= .3f;
 			}
 		}
 
