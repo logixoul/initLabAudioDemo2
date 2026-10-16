@@ -37,11 +37,13 @@ namespace workshop {
 				_listener->onEvent(ev);
 			}
 		}
+		
 		void onBeginFrame() {
 			simgui_new_frame({ sapp_width(), sapp_height(), sapp_frame_duration(), sapp_dpi_scale() });
 
 			ImGui::Begin("Synth");
 		}
+
 		void onEndFrame() {
 			ImGui::End();
 

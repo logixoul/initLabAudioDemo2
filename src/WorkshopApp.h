@@ -5,11 +5,17 @@
 #include "./AudioSystem.h"
 #include "./GuiSystem.h"
 #include <cmath>
-#include <mutex>
+#include <atomic>
 #include <memory>
 #include <map>
+#include <mutex>
+#include <vector>
 
 namespace workshop {
+	struct Settings {
+		std::atomic<float> echoDelay;
+	};
+	std::mutex mut;
 	static const std::map<char, int> keyMap = { 
 		{ 'Q', 0 },
 		{ '2', 1 },
@@ -58,14 +64,18 @@ namespace workshop {
 
 		float getNextValue(bool* finished) {
 			_phase++;
-			const float tailLength = 0.15f * SAMPLE_RATE;
+			const float tailLength = 1.00f * SAMPLE_RATE;
 			if(_phase > tailLength) {
 				*finished = true;
 				return 0.0f;
 			}
 			*finished = false;
-			return pow((tailLength - _phase) / tailLength, 2.0f);
+			return 1.0;//pow((tailLength - _phase) / tailLength, 2.0f);
 		}
+	};
+
+	class DelayLine {
+		
 	};
 
 	class NoteInstance {
@@ -95,29 +105,38 @@ namespace workshop {
 		workshop::AudioSystem _audioSystem;
 		workshop::GuiSystem _guiSystem;
 		NoteInstance* _osc = new NoteInstance(440);
+		std::vector<NoteInstance*> _notes;
 
 		WorkshopApp() {
 			_audioSystem.init(SAMPLE_RATE, this);
 			_guiSystem.init(this);
 		}
 
-		void readControls() {
+		void update() {
 			/*float f = frequency;
 			if (ImGui::SliderFloat("Frequency", &f, 50.0f, 1000.0f, "%.0f Hz")) {
 				frequency = f;
 			}*/
+			
 		}
 
 		virtual void getAudioData(float* pOutput, ma_uint32 frameCount) override {
+			std::unique_lock<std::mutex> lock(mut);
+
 			for(ma_uint32 i = 0; i < frameCount; i++) {
-				pOutput[i] = _osc->getNextValue();
+				pOutput[i] = 0.0f;
+				for(auto note : _notes) {
+					pOutput[i] += note->getNextValue();
+				}
 			}
 		}
 
 		virtual void onEvent(sapp_event const* ev) override {
+			std::unique_lock<std::mutex> lock(mut);
+
 			if(ev->type == SAPP_EVENTTYPE_KEY_DOWN) {
 				if(keyMap.contains(ev->key_code)) {
-					_osc = new NoteInstance(keyMap.at(ev->key_code));
+					_notes.push_back(new NoteInstance(keyMap.at(ev->key_code)));
 				}
 			}
 		}
