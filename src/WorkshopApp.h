@@ -75,7 +75,22 @@ namespace workshop {
 	};
 
 	class DelayLine {
-		
+		std::vector<float> _buffer;
+		int _writeIndex = 0;
+		// length is in sec
+	public:
+		void init(float length) {
+			_buffer.resize(SAMPLE_RATE * length, 0.0);
+		}
+		float process(float in) {
+			float before = _buffer[_writeIndex];
+			float& out = _buffer[_writeIndex];
+			out *= .75;
+			out += in;
+			_writeIndex++;
+			_writeIndex %= _buffer.size();
+			return before + in;
+		}
 	};
 
 	class NoteInstance {
@@ -106,8 +121,10 @@ namespace workshop {
 		workshop::GuiSystem _guiSystem;
 		NoteInstance* _osc = new NoteInstance(440);
 		std::vector<NoteInstance*> _notes;
+		DelayLine _delay;
 
 		WorkshopApp() {
+			_delay.init(0.15f);
 			_audioSystem.init(SAMPLE_RATE, this);
 			_guiSystem.init(this);
 		}
@@ -138,6 +155,7 @@ namespace workshop {
 				for(auto note : _notes) {
 					pOutput[i] += note->getNextValue();
 				}
+				pOutput[i] = _delay.process(pOutput[i]);
 			}
 		}
 

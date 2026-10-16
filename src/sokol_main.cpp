@@ -23,8 +23,8 @@ namespace workshop {
 sapp_desc sokol_main(int argc, char* argv[]) {
     return sapp_desc{
         .init_cb = &workshop::initApp,
-        .event_cb = &workshop::appHandleEvent,
         .frame_cb = &workshop::updateApp,
 		.cleanup_cb = &workshop::cleanupApp,
+        .event_cb = &workshop::appHandleEvent,
     };
 }
