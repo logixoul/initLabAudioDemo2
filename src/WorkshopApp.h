@@ -117,7 +117,17 @@ namespace workshop {
 			if (ImGui::SliderFloat("Frequency", &f, 50.0f, 1000.0f, "%.0f Hz")) {
 				frequency = f;
 			}*/
-			
+			std::unique_lock<std::mutex> lock(mut);
+			std::vector<NoteInstance*> newNotes;
+			for(auto& note : _notes) {
+				if(note->_finished) {
+					delete note;
+					note = nullptr;
+				} else {
+					newNotes.push_back(note);
+				}
+			}
+			_notes = newNotes;
 		}
 
 		virtual void getAudioData(float* pOutput, ma_uint32 frameCount) override {
