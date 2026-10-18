@@ -5,7 +5,6 @@
 #include "./AudioSystem.h"
 #include "./GuiSystem.h"
 #include <cmath>
-#include <atomic>
 #include <memory>
 #include <map>
 #include <mutex>
@@ -13,7 +12,7 @@
 
 namespace workshop {
 	struct Settings {
-		std::atomic<float> echoDelay = 1.0;
+		float echoDelay = 1.0;
 	} settings;
 	std::mutex mut;
 	static const std::map<char, int> keyMap = { 
@@ -175,10 +174,8 @@ namespace workshop {
 
 		void update() {
 			std::unique_lock<std::mutex> lock(mut);
-			float d = settings.echoDelay.load();
-			if (ImGui::SliderFloat("Reverb length", &d, 0.1f, 10.0f, "%.1f sec")) {
-				settings.echoDelay.store(d);
-				_reverb.reinit(d);
+			if (ImGui::SliderFloat("Reverb length", &settings.echoDelay, 0.1f, 10.0f, "%.1f sec")) {
+				_reverb.reinit(settings.echoDelay);
 			}
 			std::vector<NoteInstance*> newNotes;
 			for(auto& note : _notes) {
