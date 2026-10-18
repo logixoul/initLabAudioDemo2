@@ -1,5 +1,5 @@
 CXX      = clang++
-CXXFLAGS = -O2 -std=c++20 -Ilib -Ilib/imgui -Ilib/sokol -MMD -MP
+CXXFLAGS = -O0 -g -std=c++20 -Ilib -Ilib/imgui -Ilib/sokol -MMD -MP
 LDLIBS   = -lopengl32 -lgdi32 -luser32
 OBJS     = build/sokol_main.o build/lib_impl.o \
            build/imgui.o build/imgui_draw.o build/imgui_tables.o build/imgui_widgets.o
@@ -8,7 +8,7 @@ OBJS     = build/sokol_main.o build/lib_impl.o \
 vpath %.cpp src lib lib/imgui
 
 build/synth.exe: $(OBJS)
-	$(CXX) $^ $(LDLIBS) -o $@
+	$(CXX) -g $^ $(LDLIBS) -o $@
 
 build/%.o: %.cpp | build
 	$(CXX) $(CXXFLAGS) -c $< -o $@

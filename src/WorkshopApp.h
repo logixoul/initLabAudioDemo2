@@ -13,8 +13,8 @@
 
 namespace workshop {
 	struct Settings {
-		std::atomic<float> echoDelay;
-	};
+		std::atomic<float> echoDelay = 1.0;
+	} settings;
 	std::mutex mut;
 	static const std::map<char, int> keyMap = { 
 		{ 'Q', 0 },
@@ -30,6 +30,30 @@ namespace workshop {
 		{ '7', 10 },
 		{ 'U', 11 },
 		{ 'I', 12 },
+		{ '9', 13 },
+		{ 'O', 14 },
+		{ '0', 15 },
+		{ 'P', 16 },
+		{ '[', 17 },
+		{ '=', 18 },
+		{ ']', 19 },
+		{ 'Z', -20 },
+		{ 'S', -19 },
+		{ 'X', -18 },
+		{ 'D', -17 },
+		{ 'C', -16 },
+		{ 'V', -15 },
+		{ 'G', -14 },
+		{ 'B', -13 },
+		{ 'H', -12 },
+		{ 'N', -11 },
+		{ 'J', -10 },
+		{ 'M', -9 },
+		{ ',', -8 },
+		{ 'L', -7 },
+		{ '.', -6 },
+		{ ';', -5 },
+		{ '/', -4 }
 	};
 	static const float oneTurn = 2 * 3.14159265f;
 	static const int SAMPLE_RATE = 48000;
@@ -96,7 +120,8 @@ namespace workshop {
 	class Reverb {
 		std::vector<DelayLine> _delays;
 	public:
-		void init(float decay) {
+		void reinit(float decay) {
+			_delays.clear();
 			const int num = 11;
 			for(int i = 0; i < num; i++) {
 				float iNorm = i / float(num);
@@ -115,6 +140,7 @@ namespace workshop {
 		}
 	};
 
+
 	class NoteInstance {
 	public:
 		int _pitchIndex;
@@ -129,11 +155,7 @@ namespace workshop {
 		}
 
 		float getNextValue() {
-			bool finished;
-			return _env.getNextValue(&finished) * _osc->getNextValue();
-			if(finished) {
-				this->_finished = true;
-			}
+			return _osc->getNextValue();
 		}
 	};
 	
@@ -146,17 +168,18 @@ namespace workshop {
 		Reverb _reverb;
 
 		WorkshopApp() {
-			_reverb.init(0.15f);
+			_reverb.reinit(0.15f);
 			_audioSystem.init(SAMPLE_RATE, this);
 			_guiSystem.init(this);
 		}
 
 		void update() {
-			/*float f = frequency;
-			if (ImGui::SliderFloat("Frequency", &f, 50.0f, 1000.0f, "%.0f Hz")) {
-				frequency = f;
-			}*/
 			std::unique_lock<std::mutex> lock(mut);
+			float d = settings.echoDelay.load();
+			if (ImGui::SliderFloat("Reverb length", &d, 0.1f, 10.0f, "%.1f sec")) {
+				settings.echoDelay.store(d);
+				_reverb.reinit(d);
+			}
 			std::vector<NoteInstance*> newNotes;
 			for(auto& note : _notes) {
 				if(note->_finished) {
@@ -177,8 +200,9 @@ namespace workshop {
 				for(auto note : _notes) {
 					pOutput[i] += note->getNextValue();
 				}
+				pOutput[i] = std::tanh(pOutput[i]*4.0);
 				pOutput[i] = _reverb.process(pOutput[i]);
-				pOutput[i] *= .3f;
+				//pOutput[i] *= .3f;
 			}
 		}
 
@@ -186,10 +210,16 @@ namespace workshop {
 			std::unique_lock<std::mutex> lock(mut);
 
 			if(ev->type == SAPP_EVENTTYPE_KEY_DOWN) {
+				if(ev->key_repeat) {
+					return;
+				}
 				if(keyMap.contains(ev->key_code)) {
 					_notes.push_back(new NoteInstance(keyMap.at(ev->key_code)));
 				}
 			} else if(ev->type == SAPP_EVENTTYPE_KEY_UP) {
+				if(ev->key_repeat) {
+					return;
+				}
 				if(keyMap.contains(ev->key_code)) {
 					for(auto& note : _notes) {
 						if(note->_pitchIndex == keyMap.at(ev->key_code)) {
