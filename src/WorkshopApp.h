@@ -135,10 +135,9 @@ namespace workshop {
 			for(auto& delay : _delays) {
 				out += delay.process(in);
 			}
-			return 0.9f*in+0.5f*out / _delays.size();
+			return 0.55f*in + 0.45f*out / _delays.size();
 		}
 	};
-
 
 	class NoteInstance {
 	public:
