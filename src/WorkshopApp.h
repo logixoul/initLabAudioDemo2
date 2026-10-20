@@ -13,6 +13,7 @@
 namespace workshop {
 	struct Settings {
 		float echoDelay = 1.0;
+		float ssawDetune = 0.01f;
 	} settings;
 	std::mutex mut;
 	static const std::map<char, int> keyMap = { 
@@ -36,30 +37,30 @@ namespace workshop {
 		{ '[', 17 },
 		{ '=', 18 },
 		{ ']', 19 },
-		{ 'Z', -20 },
-		{ 'S', -19 },
-		{ 'X', -18 },
-		{ 'D', -17 },
-		{ 'C', -16 },
-		{ 'V', -15 },
-		{ 'G', -14 },
-		{ 'B', -13 },
-		{ 'H', -12 },
-		{ 'N', -11 },
-		{ 'J', -10 },
-		{ 'M', -9 },
-		{ ',', -8 },
-		{ 'L', -7 },
-		{ '.', -6 },
-		{ ';', -5 },
-		{ '/', -4 }
+		{ 'Z', -19 },
+		{ 'S', -18 },
+		{ 'X', -17 },
+		{ 'D', -16 },
+		{ 'C', -15 },
+		{ 'V', -14 },
+		{ 'G', -13 },
+		{ 'B', -12 },
+		{ 'H', -11 },
+		{ 'N', -10 },
+		{ 'J', -9 },
+		{ 'M', -8 },
+		{ ',', -7 },
+		{ 'L', -6 },
+		{ '.', -5 },
+		{ ';', -4 },
+		{ '/', -3 }
 	};
 	static const float oneTurn = 2 * 3.14159265f;
 	static const int SAMPLE_RATE = 48000;
 
 	class OscBase {
 	public:
-		float _phase = 0.0f;
+		float _phase = rand() / float(RAND_MAX);
 
 		virtual float getNextValue() = 0;
 
@@ -78,6 +79,42 @@ namespace workshop {
 			const float phaseStep = _frequency / SAMPLE_RATE;
 			_phase = std::fmod(_phase + phaseStep, 1.0f);
 			return 0.2f * std::sin(_phase * oneTurn);
+		}
+	};
+
+	class Saw : public OscBase {
+	public:
+		float _frequency;
+		Saw(float frequency) {
+			_frequency = frequency;
+		}
+
+		virtual float getNextValue() override {
+			_phase++;
+			const float phaseStep = _frequency / SAMPLE_RATE;
+			_phase = std::fmod(_phase + phaseStep, 1.0f);
+			return _phase * 2.0 - 1.0;
+		}
+	};
+
+	class Supersaw : public OscBase {
+	public:
+		float _frequency;
+		std::vector<Saw> _saws;
+		Supersaw(float frequency) {
+			_frequency = frequency;
+			for(int i = 0; i < 7; i++) {
+				float freqMul = 1.0 + float(i-3) * settings.ssawDetune;
+				_saws.push_back(Saw(frequency * freqMul));
+			}
+		}
+
+		virtual float getNextValue() override {
+			float sum = 0.0f;
+			for(auto& saw : _saws) {
+				sum += saw.getNextValue();
+			}
+			return sum / _saws.size();
 		}
 	};
 
@@ -148,7 +185,7 @@ namespace workshop {
 
 		NoteInstance(int pitchIndex) {
 			static const float twelvethRootOf2 = std::powf(2.0f, 1.0f /12.0f);
-			_osc = std::make_shared<Sine>(440.0f * std::powf(twelvethRootOf2, pitchIndex));
+			_osc = std::make_shared<Supersaw>(440.0f * std::powf(twelvethRootOf2, pitchIndex));
 			this->_pitchIndex = pitchIndex;
 		}
 
@@ -176,6 +213,8 @@ namespace workshop {
 			if (ImGui::SliderFloat("Reverb length", &settings.echoDelay, 0.1f, 10.0f, "%.1f sec")) {
 				_reverb.reinit(settings.echoDelay);
 			}
+			ImGui::SliderFloat("Supersaw detune", &settings.ssawDetune, 0.005f, 0.02f, "%.4f sec");
+
 			std::vector<NoteInstance*> newNotes;
 			for(auto& note : _notes) {
 				if(note->_finished) {
@@ -196,7 +235,7 @@ namespace workshop {
 				for(auto note : _notes) {
 					pOutput[i] += note->getNextValue();
 				}
-				pOutput[i] = std::tanh(pOutput[i]*4.0);
+				//pOutput[i] = std::tanh(pOutput[i]*4.0);
 				pOutput[i] = _reverb.process(pOutput[i]);
 				//pOutput[i] *= .3f;
 			}
