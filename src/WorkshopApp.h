@@ -261,18 +261,11 @@ namespace workshop {
 				_reverb.reinit(settings.echoDelay);
 			}
 			ImGui::SliderFloat("Supersaw detune", &settings.ssawDetune, 0.005f, 0.02f, "%.4f sec");
-			static const char* items[] = { "sine", "saw", "square", "supersaw" };
-			bool selectedItem = 0;
-			if (ImGui::BeginListBox("Osc")) {
-				for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
-					bool isSelected = (selectedItem == i);
-					if (ImGui::Selectable(items[i], isSelected))
-						settings.oscName = items[i];
-					if (isSelected)
-						ImGui::SetItemDefaultFocus();
-				}
-				ImGui::EndListBox();
+			std::vector<std::string> oscNames;
+			for(auto& factoryItem : oscFactory) {
+				oscNames.push_back(factoryItem.first);
 			}
+			workshop::imguiRadioGroup("osc", oscNames, settings.oscName);
 			//ImGui::Combo("Osc", int *current_item, const char *const *items, int items_count)
 			//ImGui::Combo(const char *label, int *current_item, const char *const *items, int items_count)
 			std::vector<NoteInstance*> newNotes;
