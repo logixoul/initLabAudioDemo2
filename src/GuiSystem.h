@@ -6,7 +6,8 @@
 #include <sokol_glue.h>
 #include <imgui.h>
 #include <sokol_imgui.h>
-
+#include <vector>
+#include <string>
 
 namespace workshop {
 	class IGuiListener {
@@ -52,6 +53,19 @@ namespace workshop {
 			sg_commit();
 		}
 	};
+
+	void imguiRadioGroup(std::string name, std::vector<std::string> options, std::string& choice) {
+		if (ImGui::BeginListBox(name.c_str())) {
+			for (auto& opt : options) {
+				bool isSelected = (opt == choice);
+				if (ImGui::Selectable(opt.c_str(), isSelected))
+					choice = opt;
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndListBox();
+		}
+	}
 }
 
 #endif // GUISYSTEM_H
