@@ -147,7 +147,7 @@ namespace workshop {
 		float _frequency;
 		Saw _saw;
 		Square _square;
-		Sandstorm(float frequency) : _saw(frequency/2), _square(frequency * SHIFT/2) {
+		Sandstorm(float frequency) : _saw(frequency), _square(frequency * SHIFT) {
 			_frequency = frequency;
 			
 		}
@@ -159,11 +159,11 @@ namespace workshop {
 
 	std::map<std::string, std::function<OscBasePtr(float)>> oscFactory = 
 	{
-		{ "sine", [](float freq) { return std::make_shared<Sine>(freq); } },
+		{ "sine", [](float freq) { return std::make_shared<Sine>(freq * 2.0f); } },
 		{ "saw", [](float freq) { return std::make_shared<Saw>(freq); } },
 		{ "square", [](float freq) { return std::make_shared<Square>(freq); } },
-		{ "supersaw", [](float freq) { return std::make_shared<Supersaw>(freq); } },
-		{ "sandstorm", [](float freq) { return std::make_shared<Sandstorm>(freq); } }
+		{ "supersaw", [](float freq) { return std::make_shared<Supersaw>(freq / 2.0f); } },
+		{ "sandstorm", [](float freq) { return std::make_shared<Sandstorm>(freq / 4.0f); } }
 	};
 
 	class Env {
@@ -171,14 +171,15 @@ namespace workshop {
 		float _phase = 0.0f;
 
 		float getNextValue(bool* finished) {
-			_phase++;
+			return 1.0f;
+			/*_phase++;
 			const float tailLength = 1.00f * SAMPLE_RATE;
 			if(_phase > tailLength) {
 				*finished = true;
 				return 0.0f;
 			}
 			*finished = false;
-			return pow((tailLength - _phase) / tailLength, 4.f);
+			return pow((tailLength - _phase) / tailLength, 4.f);*/
 		}
 	};
 
@@ -290,7 +291,7 @@ namespace workshop {
 				}
 				//pOutput[i] = std::tanh(pOutput[i]*4.0);
 				pOutput[i] = _reverb.process(pOutput[i]);
-				//pOutput[i] *= .3f;
+				pOutput[i] *= .3f;
 			}
 		}
 
