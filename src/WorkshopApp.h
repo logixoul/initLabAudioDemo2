@@ -291,7 +291,7 @@ namespace workshop {
 				}
 				//pOutput[i] = std::tanh(pOutput[i]*4.0);
 				pOutput[i] = _reverb.process(pOutput[i]);
-				pOutput[i] *= .3f;
+				pOutput[i] *= .4f;
 			}
 		}
 

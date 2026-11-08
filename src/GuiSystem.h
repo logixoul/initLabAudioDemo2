@@ -33,7 +33,33 @@ namespace workshop {
 		}
 
 		void handleEvent(const sapp_event* ev) {
-			bool imguiHandledIt = simgui_handle_event(ev);
+			simgui_handle_event(ev);
+			// simgui_handle_event returns WantCaptureKeyboard || WantCaptureMouse for every
+			// event type, so hovering the panel would swallow key events. Decide per category,
+			// and always forward key-ups so notes can't get stuck.
+			const ImGuiIO& io = ImGui::GetIO();
+			bool imguiHandledIt;
+			switch(ev->type) {
+				case SAPP_EVENTTYPE_KEY_UP:
+					imguiHandledIt = false;
+					break;
+				case SAPP_EVENTTYPE_KEY_DOWN:
+				case SAPP_EVENTTYPE_CHAR:
+					imguiHandledIt = io.WantCaptureKeyboard;
+					break;
+				case SAPP_EVENTTYPE_MOUSE_DOWN:
+				case SAPP_EVENTTYPE_MOUSE_UP:
+				case SAPP_EVENTTYPE_MOUSE_MOVE:
+				case SAPP_EVENTTYPE_MOUSE_SCROLL:
+				case SAPP_EVENTTYPE_TOUCHES_BEGAN:
+				case SAPP_EVENTTYPE_TOUCHES_MOVED:
+				case SAPP_EVENTTYPE_TOUCHES_ENDED:
+					imguiHandledIt = io.WantCaptureMouse;
+					break;
+				default:
+					imguiHandledIt = false;
+					break;
+			}
 			if(!imguiHandledIt) {
 				_listener->onEvent(ev);
 			}
