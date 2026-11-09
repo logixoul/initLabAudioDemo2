@@ -4,7 +4,8 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "mingw32-make",
+            "command": "make",
+            "windows": { "command": "mingw32-make" },
             "group": { "kind": "build", "isDefault": true },
             "problemMatcher": "$gcc"
         }

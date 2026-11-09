@@ -5,7 +5,8 @@
             "name": "Run synth",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/synth.exe",
+            "program": "${workspaceFolder}/build/synth",
+            "windows": { "program": "${workspaceFolder}/build/synth.exe" },
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "build"
         }
