@@ -1,14 +1,35 @@
 CXX      = clang++
 CXXFLAGS = -O0 -g -std=c++20 -Ilib -Ilib/imgui -Ilib/sokol -MMD -MP
-LDLIBS   = -lopengl32 -lgdi32 -luser32
 OBJS     = build/sokol_main.o build/lib_impl.o \
            build/imgui.o build/imgui_draw.o build/imgui_tables.o build/imgui_widgets.o
+
+# Platform-specific libraries and executable name.
+ifeq ($(OS),Windows_NT)
+    PLATFORM = windows
+    LDLIBS   = -lopengl32 -lgdi32 -luser32
+    EXE      = build/synth.exe
+else
+    EXE      = build/synth
+    ifeq ($(shell uname -s),Darwin)
+        PLATFORM = macos
+        LDLIBS   = -framework Cocoa -framework QuartzCore -framework OpenGL \
+                   -framework CoreAudio -framework AudioToolbox -framework CoreFoundation
+    else
+        PLATFORM = linux
+        LDLIBS   = -lX11 -lXi -lXcursor -lGL -ldl -lpthread -lm
+    endif
+endif
 
 # Look for sources in src/, lib/ and lib/imgui/.
 vpath %.cpp src lib lib/imgui
 
-build/synth.exe: $(OBJS)
+$(EXE): $(OBJS)
 	$(CXX) -g $^ $(LDLIBS) -o $@
+
+# On macOS, sokol_app's implementation is Objective-C, so lib_impl.cpp must be compiled as Objective-C++.
+ifeq ($(PLATFORM),macos)
+build/lib_impl.o: CXXFLAGS += -x objective-c++
+endif
 
 build/%.o: %.cpp | build
 	$(CXX) $(CXXFLAGS) -c $< -o $@
