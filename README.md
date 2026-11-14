@@ -1,4 +1,9 @@
-compile_flags.txt exists just for the clangd vscode extension to use.
+# Описание на репото
+
+В това репо е "заготовката" в/у която градим в уъркшопа.
+В нея са включени библиотеките miniaudio, imgui и sokol, и са wrap-нати удобно за целите на уъркшопа, така че реално application-specific кода е концентриран в един единствен хедър файл - WorkshopApp.h, за да се фокусираме в/у важното в живота - писането на музикален код!
+
+Бранчовете са два - `main` (bare-bones версията, от където тръгва уъркшопа - само една синусоида и един слайдър) и `fully-developed` (това, което в крайна сметка ни е target-а - това, което ще изградим заедно по продължителността на уъркшопа)
 
 ## Setup on Ubuntu
 
@@ -33,3 +38,7 @@ This installs Apple's Command Line Tools, which include `clang++`, `make` and `g
 make
 ./build/synth
 ```
+
+## Misc notes
+
+compile_flags.txt exists just for the clangd vscode extension to use.
